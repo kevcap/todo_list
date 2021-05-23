@@ -80,7 +80,7 @@ app.put('/todos/:id', checksExistsUserAccount, (req, res) => {
   const { id } = req.params;
 
   const todoIndex = user.todos.findIndex(todo => todo.id === id);
-  console.log(todoIndex);
+  
   if (todoIndex === -1) {
     return res.status(400).json({ error: "Todo doesn't exist" });
   }
@@ -111,6 +111,19 @@ app.patch('/todos/:id/done', checksExistsUserAccount, (req, res) => {
 
 app.delete('/todos/:id', checksExistsUserAccount, (req, res) => {
   // Complete aqui
+  const { user } = req;
+  const { id } = req.params;
+
+  const todoIndex = user.todos.findIndex(todo => todo.id === id);
+
+  if(todoIndex === -1 ) {
+    return res.status(400).json({error: "Task not found"});
+  }
+
+  user.todos.splice(todoIndex, 1);
+
+  res.json(user.todos)
+
 });
 
 module.exports = app;
