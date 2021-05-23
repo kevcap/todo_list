@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4, validate } = require('uuid');
 
 const app = express();
 
@@ -50,7 +50,7 @@ function findUserById() {
 
 app.post('/users', (req, res) => {
   // Complete aqui
-  const { username, name, pro } = req.body;
+  const { username, name } = req.body;
 
   const userAlreadyExists = users.some(user => user.username === username);
 
@@ -62,8 +62,8 @@ app.post('/users', (req, res) => {
     name,
     username,
     id: uuidv4(),
-    todos: [],
-    pro
+    pro: false,
+    todos: []
   }
 
   users.push(newUser);
@@ -131,6 +131,7 @@ app.patch('/todos/:id/done', checksExistsUserAccount, (req, res) => {
   return res.json(todo)
 
 });
+
 
 app.delete('/todos/:id', checksExistsUserAccount, (req, res) => {
   // Complete aqui
