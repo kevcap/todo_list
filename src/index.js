@@ -41,6 +41,23 @@ function checksCreateTodosUserAvailability(req, res, next) {
 }
 
 function checksTodoExists(req, res, next){
+  const {username} = req.headers;
+  const {id} = req.params;
+
+  const user = users.find(user => user.username == username);
+  const todo = user.todos.find(todo => todo.id === id);
+
+  console.log(user);
+  console.log(todo);
+
+  if (!todo) res.status(404).json({ error: "Todo doesn't exist" })
+  if (!validate(id)) res.status(404).json({error: "Invalid user uuid"})
+
+  req.username = username;
+  req.todo = todo;
+  req.id = id;
+
+  return next();
 
 }
 
@@ -87,6 +104,19 @@ app.get('/users/:id', findUserById, (req, res) => {
   return res.json(user);
 })
 
+app.patch('/users/:id/pro', findUserById, (req, res) => {
+  const {user} = req;
+
+  if(user.pro) {
+    return response.status(400).json({ error: 'Pro plan is already activated.' });
+  }
+
+  user.pro = true;
+
+  return res.json(user);
+
+})
+
 app.get('/todos', checksExistsUserAccount, (req, res) => {
   // Complete aqui
   const { user } = req;
@@ -112,17 +142,11 @@ app.post('/todos', checksExistsUserAccount, checksCreateTodosUserAvailability, (
 
 });
 
-app.put('/todos/:id', checksExistsUserAccount, (req, res) => {
+app.put('/todos/:id', checksExistsUserAccount, checksTodoExists, (req, res) => {
   // Complete aqui
   const { user } = req;
+  const { todo } =  req;
   const { title, deadline } = req.body;
-  const { id } = req.params;
-
-  const todo = user.todos.find(todo => todo.id === id);
-
-  if (!todo) {
-    return res.status(404).json({ error: "Todo doesn't exist" });
-  }
 
   todo.title = title;
   user.deadline = new Date(deadline);
@@ -131,35 +155,15 @@ app.put('/todos/:id', checksExistsUserAccount, (req, res) => {
 
 });
 
-app.patch('/todos/:id/done', checksExistsUserAccount, (req, res) => {
+app.patch('/todos/:id/done', checksExistsUserAccount, checksTodoExists, (req, res) => {
   // Complete aqui
-  const { user } = req;
-  const { id } = req.params;
-
-  const todo = user.todos.find(todo => todo.id === id);
-
-  if (!todo) {
-    return res.status(404).json({ error: "Todo doesn't exist" });
-  }
+  const { todo } = req;
 
   todo.done = true;
 
   return res.json(todo)
 
 });
-
-app.patch('/users/:id/pro', findUserById, (req, res) => {
-  const {user} = req;
-
-  if(user.pro) {
-    return response.status(400).json({ error: 'Pro plan is already activated.' });
-  }
-
-  user.pro = true;
-
-  return res.json(user);
-
-})
 
 app.delete('/todos/:id', checksExistsUserAccount, (req, res) => {
   // Complete aqui
