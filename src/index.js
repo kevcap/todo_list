@@ -26,9 +26,31 @@ function checksExistsUserAccount(req, res, next) {
 
 }
 
+function checksCreateTodosUserAvailability(req, res, next) {
+  const { username } = req.headers;
+
+  const user = users.find(user => user.username === username);
+  
+  if(!user.pro && user.todos.length >=10 ) {
+    console.log("teste");
+    return res.status(403).json({error: "Limit todos per basic account. Please upgrade to Pro."})
+  }
+
+  return next()
+
+}
+
+function checksTodoExists(req, res, next){
+
+}
+
+function findUserById() {
+
+}
+
 app.post('/users', (req, res) => {
   // Complete aqui
-  const { username, name, todos } = req.body;
+  const { username, name, pro } = req.body;
 
   const userAlreadyExists = users.some(user => user.username === username);
 
@@ -40,7 +62,8 @@ app.post('/users', (req, res) => {
     name,
     username,
     id: uuidv4(),
-    todos: []
+    todos: [],
+    pro
   }
 
   users.push(newUser);
@@ -55,7 +78,7 @@ app.get('/todos', checksExistsUserAccount, (req, res) => {
   return res.json(user.todos)
 });
 
-app.post('/todos', checksExistsUserAccount, (req, res) => {
+app.post('/todos', checksExistsUserAccount, checksCreateTodosUserAvailability, (req, res) => {
   // Complete aqui
   const { user } = req
   const { title, deadline } = req.body;
