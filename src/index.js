@@ -81,6 +81,12 @@ app.post('/users', (req, res) => {
   return res.status(201).json(newUser)
 });
 
+app.get('/users/:id', findUserById, (req, res) => {
+  const { user } = req;
+
+  return res.json(user);
+})
+
 app.get('/todos', checksExistsUserAccount, (req, res) => {
   // Complete aqui
   const { user } = req;
