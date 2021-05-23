@@ -44,8 +44,18 @@ function checksTodoExists(req, res, next){
 
 }
 
-function findUserById() {
+function findUserById(req, res, next) {
+  const {id} = req.params;
 
+  const user = users.find(user => user.id === id);
+  
+  if(!user) {
+    return res.status(404).json({ error: "User doesn't exist" });
+  }
+
+  req.user = user;
+
+  return next();
 }
 
 app.post('/users', (req, res) => {
@@ -132,6 +142,18 @@ app.patch('/todos/:id/done', checksExistsUserAccount, (req, res) => {
 
 });
 
+app.patch('/users/:id/pro', findUserById, (req, res) => {
+  const {user} = req;
+
+  if(user.pro) {
+    return response.status(400).json({ error: 'Pro plan is already activated.' });
+  }
+
+  user.pro = true;
+
+  return res.json(user);
+
+})
 
 app.delete('/todos/:id', checksExistsUserAccount, (req, res) => {
   // Complete aqui
